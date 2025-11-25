@@ -1,22 +1,27 @@
 class UsersController < ApplicationController
   before_action :set_user, only: %i[show update destroy]
 
+  # GET /users?cursor=<id>&limit=10
   def index
-    render json: UserService.fetch_all
+    render json: UserService.fetch_all(cursor: params[:cursor], limit: params[:limit])
   end
 
+  # GET /users/:id
   def show
-    render json: UserService.fetch(params[:id])
+    render json: UserService.fetch(@user.id)
   end
 
+  # POST /users
   def create
     render json: UserService.create(user_params), status: :created
   end
 
+  # PATCH/PUT /users/:id
   def update
     render json: UserService.update(@user, user_params)
   end
 
+  # DELETE /users/:id
   def destroy
     render json: UserService.destroy(@user)
   end

@@ -1,67 +1,68 @@
+# frozen_string_literal: true
+
 class UserService
-  DEFAULT_LIMIT = 50
-  MAX_LIMIT = 100
+  DEFAULT_LIMIT = 10
+  MAX_LIMIT     = 10
 
-  # ---------- RANGE-BASED (CURSOR) PAGINATION ----------
-  def self.fetch_all(cursor: nil, limit: nil)
-    limit = (limit || DEFAULT_LIMIT).to_i.clamp(1, MAX_LIMIT)
+  FIELDS = %i[_id name age email location].freeze
 
-    scope = User.only(:_id, :name, :age, :email, :location)
-                .order_by(_id: :asc)
+  class << self
+    def fetch_all(cursor: nil, limit: nil)
+      limit = (limit || DEFAULT_LIMIT).to_i.clamp(1, MAX_LIMIT)
 
-    if cursor.present?
-      begin
-        bson_cursor = BSON::ObjectId.from_string(cursor)
+      scope = User.only(*FIELDS).order_by(_id: :asc)
+
+      if cursor
+        bson_cursor = safe_cursor(cursor)
+        return { error: "Invalid cursor value" } unless bson_cursor
+
         scope = scope.where(:_id.gt => bson_cursor)
-      rescue BSON::ObjectId::InvalidId
-        return Oj.dump({ error: "Invalid cursor value" })
       end
-    end
 
-    users = scope.limit(limit).to_a
-    serialized = UserSerializer.serialize_collection(users)
-    next_cursor = users.last&.id&.to_s
+      users = scope.limit(limit).to_a
 
-    Oj.dump(
-      data: serialized,
-      pagination: {
-        limit: limit,
-        next_cursor: next_cursor,
-        has_more: next_cursor.present?
+      {
+        data: UserSerializer.serialize_collection(users),
+        pagination: pagination_obj(users, limit)
       }
-    )
-  end
-
-  # ---------- FETCH SINGLE USER ----------
-  def self.fetch(id)
-    user = User.find(id)
-    Oj.dump(UserSerializer.serialize(user))
-  rescue Mongoid::Errors::DocumentNotFound
-    Oj.dump({ error: "User not found" })
-  end
-
-  # ---------- CREATE USER ----------
-  def self.create(params)
-    user = User.new(params)
-    if user.save
-      Oj.dump(UserSerializer.serialize(user))
-    else
-      Oj.dump(errors: user.errors.full_messages)
     end
-  end
 
-  # ---------- UPDATE USER ----------
-  def self.update(user, params)
-    if user.update(params)
-      Oj.dump(UserSerializer.serialize(user))
-    else
-      Oj.dump(errors: user.errors.full_messages)
+    def fetch(id)
+      user = User.only(*FIELDS).find(id)
+      UserSerializer.serialize(user)
+    rescue Mongoid::Errors::DocumentNotFound
+      { error: "User not found" }
     end
-  end
 
-  # ---------- DELETE USER ----------
-  def self.destroy(user)
-    user.destroy!
-    Oj.dump({ success: true })
+    def create(params)
+      user = User.new(params)
+      user.save ? UserSerializer.serialize(user) : { errors: user.errors.full_messages }
+    end
+
+    def update(user, params)
+      user.update(params) ? UserSerializer.serialize(user) : { errors: user.errors.full_messages }
+    end
+
+    def destroy(user)
+      user.destroy!
+      { success: true }
+    end
+
+    private
+
+    def safe_cursor(cursor)
+      BSON::ObjectId.from_string(cursor)
+    rescue BSON::ObjectId::InvalidId, BSON::ObjectId::Invalid
+      nil
+    end
+
+    def pagination_obj(users, limit)
+      last = users.last
+      {
+        limit: limit,
+        next_cursor: last ? last.id.to_s : nil,
+        has_more: !!last
+      }
+    end
   end
 end

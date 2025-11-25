@@ -6,7 +6,7 @@ development:
       # Mongoid can connect to a URI accepted by the driver:
       # uri: mongodb://user:password@mongodb.domain.com:27017/mongoinspo_development
       # uri: mongodb+srv://test:test@cluster0.p9kx305.mongodb.net/?appName=Cluster0
-      uri: mongodb://admin:admin@localhost:27017/inspo
+      uri: mongodb://admin:admin@localhost:27017/inspo?authSource=admin
 
       # Otherwise define the parameters separately.
       # This defines the name of the default database that Mongoid can connect to.
@@ -71,7 +71,7 @@ development:
         server_selection_timeout: 5
 
         # The maximum number of connections in the connection pool. (default: 5)
-        max_pool_size: 5
+        max_pool_size: 20
 
         # The minimum number of connections in the connection pool. (default: 1)
         # min_pool_size: 1

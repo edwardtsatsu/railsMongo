@@ -304,6 +304,7 @@ DEPENDENCIES
   brakeman
   debug
   kamal
+  mongo (~> 2.21, >= 2.21.3)
   mongoid
   puma (>= 5.0)
   rails (~> 8.0.0)

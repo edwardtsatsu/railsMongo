@@ -18,6 +18,8 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+gem "mongo", "~> 2.21", ">= 2.21.3"
+
 gem "mongoid"
 
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]

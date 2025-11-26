@@ -60,8 +60,8 @@ class UserService
       last = users.last
       {
         limit: limit,
-        next_cursor: last ? last.id.to_s : nil,
-        has_more: !!last
+        next_cursor: users.size == limit ? last.id.to_s : nil,
+        has_more: users.size == limit
       }
     end
   end

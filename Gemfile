@@ -18,7 +18,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-gem "mongo", "~> 2.21", ">= 2.21.3"
+gem "mongo", "~> 2.22"
 
 gem "mongoid"
 

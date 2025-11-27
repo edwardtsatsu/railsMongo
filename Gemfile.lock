@@ -146,7 +146,7 @@ GEM
     marcel (1.1.0)
     mini_mime (1.1.5)
     minitest (5.26.2)
-    mongo (2.21.3)
+    mongo (2.22.0)
       base64
       bson (>= 4.14.1, < 6.0.0)
     mongoid (9.0.8)
@@ -328,7 +328,7 @@ DEPENDENCIES
   kamal
   kaminari
   kaminari-mongoid
-  mongo (~> 2.21, >= 2.21.3)
+  mongo (~> 2.22)
   mongoid
   oj
   puma (>= 5.0)
